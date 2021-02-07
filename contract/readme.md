@@ -1,1 +1,1 @@
-# Wallet Sellector
+# Wallet Registry Contract
