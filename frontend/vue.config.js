@@ -1,13 +1,13 @@
 /*
  * @Author: your name
  * @Date: 2021-01-05 16:46:17
- * @LastEditTime: 2021-02-22 21:13:50
+ * @LastEditTime: 2021-03-09 17:34:53
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /near-coin/vue.config.js
  */
 const path = require('path')// 引入path模块
-const publicPath = './'
+const publicPath = '/'
 function resolve (dir) {
   return path.join(__dirname, dir)// path.join(__dirname)设置绝对路径
 }

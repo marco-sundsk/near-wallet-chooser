@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2021-02-15 15:55:31
- * @LastEditTime: 2021-02-18 14:43:40
+ * @LastEditTime: 2021-02-23 14:39:24
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /swap-select/src/router/index.js
@@ -31,6 +31,7 @@ const routes = [
 ]
 
 const router = new VueRouter({
+  mode: 'history',
   routes
 })
 

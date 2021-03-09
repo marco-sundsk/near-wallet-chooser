@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2021-02-15 16:07:41
- * @LastEditTime: 2021-02-22 21:21:44
+ * @LastEditTime: 2021-03-09 17:29:40
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /swap-select/src/views/Index.vue
@@ -44,7 +44,8 @@ export default {
       walletArr: [],
       walletName: '',
       indexStyle: {
-        background: `url('${window.startImgUrl}/img/bg-bottom.41575828.png') no-repeat right bottom`
+        background: `url('${window.startImgUrl}/img/bg-bottom.41575828.png') no-repeat right bottom`,
+        'background-size': '25.75rem 7.0625rem'
       }
     }
   },
@@ -72,13 +73,21 @@ export default {
       this.windowWidth = document.documentElement.clientWidth || document.body.offsetWidth
     },
     async getWallet () {
-      const walletArr = await window.contract.get_wallets({ from_index: 0, limit: 100 })
-      console.log(walletArr)
-      this.walletArr = walletArr
+      try {
+        const walletArr = await window.contract.get_wallets({ from_index: 0, limit: 100 })
+        this.walletArr = walletArr
+      } catch (err) {
+        console.error(err)
+      }
     },
     goWallet (item) {
       window.localStorage.setItem('walletName', item.wallet_name)
-      window.location.href = (item.wallet_url + window.location.search)
+      let pathname = window.location.pathname
+      if (process.env.VUE_APP_PATH_NAME) {
+        pathname = pathname.replace(process.env.VUE_APP_PATH_NAME, '')
+      }
+      pathname = pathname.slice(1, window.location.pathname.length)
+      window.location.href = (item.wallet_url + pathname + window.location.search)
     },
     getWalletName () {
       const name = window.localStorage.getItem('walletName')
@@ -109,8 +118,8 @@ export default {
   .index {
     width: 100%;
     height: 100%;
-    /* background: url('~@/assets/img/bg-bottom.png') no-repeat right bottom; */
-    background-size: 412px 113px;
+    /* background: url('~@/assets/img/bg-bottom.png') no-repeat right bottom;
+    background-size: 412px 113px; */
     .container {
       width: 1650px;
       margin: 0 auto;
