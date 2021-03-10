@@ -1,4 +1,4 @@
-# swap-select
+# near-wallet-select frontend
 
 ## Project setup
 ```
