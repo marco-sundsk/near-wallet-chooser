@@ -1,17 +1,8 @@
-<!--
- * @Author: your name
- * @Date: 2021-02-15 16:07:41
- * @LastEditTime: 2021-03-09 17:29:40
- * @LastEditors: Please set LastEditors
- * @Description: In User Settings Edit
- * @FilePath: /swap-select/src/views/Index.vue
--->
 <template>
-  <div :class="index" :style="indexS">
+  <div :class="index">
     <!-- <choose-wallet></choose-wallet> -->
     <div class="container">
       <div class="main">
-        <img class="bg-img" :src="imgUrl + '/img/bg.d033c87f.png'" alt="">
         <div class="choose">
           <div class="title">Choose a wallet</div>
           <div class="content">
@@ -42,11 +33,7 @@ export default {
     return {
       windowWidth: '',
       walletArr: [],
-      walletName: '',
-      indexStyle: {
-        background: `url('${window.startImgUrl}/img/bg-bottom.41575828.png') no-repeat right bottom`,
-        'background-size': '25.75rem 7.0625rem'
-      }
+      walletName: ''
     }
   },
   computed: {
@@ -59,13 +46,6 @@ export default {
     },
     imgUrl () {
       return window.startImgUrl
-    },
-    indexS () {
-      if (this.windowWidth > 500) {
-        return this.indexStyle
-      } else {
-        return ''
-      }
     }
   },
   methods: {
@@ -118,8 +98,8 @@ export default {
   .index {
     width: 100%;
     height: 100%;
-    /* background: url('~@/assets/img/bg-bottom.png') no-repeat right bottom;
-    background-size: 412px 113px; */
+    background: url('~@/assets/img/bg-bottom.png') no-repeat right bottom;
+    background-size: 412px 113px;
     .container {
       width: 1650px;
       margin: 0 auto;
@@ -129,10 +109,10 @@ export default {
       .main {
         width: 100%;
         height: 678px;
-        /* background: url('~@/assets/img/bg.png') no-repeat; */
-        /* background-size: 923px 678px; */
+        background: url('~@/assets/img/bg.png') no-repeat;
+        background-size: 923px 678px;
         display: flex;
-        justify-content: space-between;
+        justify-content: flex-end;
         .bg-img {
           width: 923px;
           height: 678px;

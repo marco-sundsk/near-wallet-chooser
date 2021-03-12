@@ -8,7 +8,7 @@
  */
 const path = require('path')// 引入path模块
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const publicPath = './'
+const publicPath = '/'
 function resolve (dir) {
   return path.join(__dirname, dir)// path.join(__dirname)设置绝对路径
 }
@@ -25,7 +25,7 @@ module.exports = {
   devServer: {
     publicPath,
     open: true,
-    port: 8000
+    port: 8080
   },
   lintOnSave: true,
   css: {
