@@ -1,27 +1,19 @@
-demo4selector Smart Contract
+Wallet Selector Smart Contract
 ==================
 
-A [smart contract] written in [Rust] for an app initialized with [create-near-app]
+## Deploy
+deploy to selector.testnet  
 
+deploy process:
 
-Quick Start
-===========
+```shell
+near deploy selector.testnet res/selector.wasm --account_id=selector.testnet
+near call selector.testnet new '' --account_id=selector.testnet
+```
 
-Before you compile this code, you will need to install Rust with [correct target]
+## Check Content
 
-
-Exploring The Code
-==================
-
-1. The main smart contract code lives in `src/lib.rs`. You can compile it with
-   the `./compile` script.
-2. Tests: You can run smart contract tests with the `./test` script. This runs
-   standard Rust tests using [cargo] with a `--nocapture` flag so that you
-   can see any debug info you print to the console.
-
-
-  [smart contract]: https://docs.near.org/docs/roles/developer/contracts/intro
-  [Rust]: https://www.rust-lang.org/
-  [create-near-app]: https://github.com/near/create-near-app
-  [correct target]: https://github.com/near/near-sdk-rs#pre-requisites
-  [cargo]: https://doc.rust-lang.org/book/ch01-03-hello-cargo.html
+check contents:
+```shell
+near view selector.testnet get_wallets '{"from_index":0, "limit":100}'
+```
