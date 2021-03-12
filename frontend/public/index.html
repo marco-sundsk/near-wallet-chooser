@@ -65,17 +65,42 @@
                 heads[0].appendChild(link)
             else 
                 doc.documentElement.appendChild(link)
-          }
-          function addScript(url, path) {
-            var script=document.createElement('script')
-            script.setAttribute('type', 'text/javascript')
-            script.setAttribute('src', url + path)
-            var heads = document.getElementsByTagName('head')
-            if(heads.length) 
-                heads[0].appendChild(script)
-            else 
-                document.documentElement.appendChild(script)
-          }
+        }
+        function addScript(url, path) {
+          var script=document.createElement('script')
+          script.setAttribute('type', 'text/javascript')
+          script.setAttribute('src', url + path)
+          var heads = document.getElementsByTagName('head')
+          if(heads.length) 
+              heads[0].appendChild(script)
+          else 
+              document.documentElement.appendChild(script)
+        }
+        function addCssLink1(url, path) {
+          var doc=document
+          var link=doc.createElement('link')
+          link.setAttribute('rel', 'preload')
+          link.setAttribute('as', 'style')
+          link.setAttribute('href', url + path)
+        
+          var heads = doc.getElementsByTagName('head')
+          if(heads.length) 
+              heads[0].appendChild(link)
+          else 
+              doc.documentElement.appendChild(link)
+        }
+        function addCssLink2(url, path) {
+          var doc=document
+          var link=doc.createElement('link')
+          link.setAttribute('rel', 'stylesheet')
+          link.setAttribute('href', url + path)
+        
+          var heads = doc.getElementsByTagName('head')
+          if(heads.length) 
+              heads[0].appendChild(link)
+          else 
+              doc.documentElement.appendChild(link)
+        }
 
         /**
          * 创建script标签，并将js的字符串内容填充至script标签中，
@@ -89,7 +114,8 @@
             // 但是还未执行到flag=!flag的时候，第二个就进来的情况；
             if (flag) {
               window.startImgUrl = scriptUrl
-              addLink(scriptUrl, '/css/app.css ')
+              ddCssLink1(scriptUrl, '/css/app.css ')
+              addCssLink2(scriptUrl, '/css/app.css ')
               addLink(scriptUrl, '/js/app.js')
               addLink(scriptUrl, '/js/chunk-vendors.js')
               addScript(scriptUrl, '/js/chunk-vendors.js')
