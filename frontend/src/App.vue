@@ -18,6 +18,12 @@ export default {
     }
   },
   async created () {
+    let pathname = window.location.pathname
+    if (process.env.VUE_APP_PATH_NAME) {
+      pathname = pathname.replace(process.env.VUE_APP_PATH_NAME, '')
+    }
+    pathname = pathname.slice(1, window.location.pathname.length)
+    window.myUrl = pathname + window.location.search
     await initContract()
   }
 }

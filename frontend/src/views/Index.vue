@@ -1,11 +1,3 @@
-<!--
- * @Author: your name
- * @Date: 2021-02-15 16:07:41
- * @LastEditTime: 2021-03-09 17:29:40
- * @LastEditors: Please set LastEditors
- * @Description: In User Settings Edit
- * @FilePath: /swap-select/src/views/Index.vue
--->
 <template>
   <div :class="index" :style="indexS">
     <!-- <choose-wallet></choose-wallet> -->
@@ -82,12 +74,7 @@ export default {
     },
     goWallet (item) {
       window.localStorage.setItem('walletName', item.wallet_name)
-      let pathname = window.location.pathname
-      if (process.env.VUE_APP_PATH_NAME) {
-        pathname = pathname.replace(process.env.VUE_APP_PATH_NAME, '')
-      }
-      pathname = pathname.slice(1, window.location.pathname.length)
-      window.location.href = (item.wallet_url + pathname + window.location.search)
+      window.location.href = (item.wallet_url + window.myUrl)
     },
     getWalletName () {
       const name = window.localStorage.getItem('walletName')
