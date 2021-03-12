@@ -1,8 +1,17 @@
+<!--
+ * @Author: your name
+ * @Date: 2021-02-15 16:07:41
+ * @LastEditTime: 2021-03-09 17:29:40
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: /swap-select/src/views/Index.vue
+-->
 <template>
-  <div :class="index">
+  <div :class="index" :style="indexS">
     <!-- <choose-wallet></choose-wallet> -->
     <div class="container">
       <div class="main">
+        <img class="bg-img" :src="imgUrl + '/img/bg.png'" alt="">
         <div class="choose">
           <div class="title">Choose a wallet</div>
           <div class="content">
@@ -10,7 +19,7 @@
               <li v-for="(item, index) in walletArr" :key="index" @click="goWallet(item)" :class="{ select: item.wallet_name === walletName }">
                 <div class="wallet-info">
                   <div class="wallet-logo">
-                    <img :src="item.wallet_logo_url" alt="">
+                    <img :src="window.startImgUrl + '/img/' + item.wallet_logo_url" alt="">
                   </div>
                   <div class="wallet-name">{{item.wallet_name}}</div>
                 </div>
@@ -33,7 +42,11 @@ export default {
     return {
       windowWidth: '',
       walletArr: [],
-      walletName: ''
+      walletName: '',
+      indexStyle: {
+        background: `url('${window.startImgUrl}/img/bg-bottom.png') no-repeat right bottom`,
+        'background-size': '25.75rem 7.0625rem'
+      }
     }
   },
   computed: {
@@ -46,6 +59,13 @@ export default {
     },
     imgUrl () {
       return window.startImgUrl
+    },
+    indexS () {
+      if (this.windowWidth > 500) {
+        return this.indexStyle
+      } else {
+        return ''
+      }
     }
   },
   methods: {
@@ -98,8 +118,8 @@ export default {
   .index {
     width: 100%;
     height: 100%;
-    background: url('~@/assets/img/bg-bottom.png') no-repeat right bottom;
-    background-size: 412px 113px;
+    /* background: url('~@/assets/img/bg-bottom.png') no-repeat right bottom;
+    background-size: 412px 113px; */
     .container {
       width: 1650px;
       margin: 0 auto;
@@ -109,10 +129,10 @@ export default {
       .main {
         width: 100%;
         height: 678px;
-        background: url('~@/assets/img/bg.png') no-repeat;
-        background-size: 923px 678px;
+        /* background: url('~@/assets/img/bg.png') no-repeat; */
+        /* background-size: 923px 678px; */
         display: flex;
-        justify-content: flex-end;
+        justify-content: space-between;
         .bg-img {
           width: 923px;
           height: 678px;
