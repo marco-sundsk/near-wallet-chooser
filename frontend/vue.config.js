@@ -41,7 +41,7 @@ module.exports = {
   configureWebpack: config => {
     config.plugins.forEach((val) => {
       if (val instanceof HtmlWebpackPlugin) {
-        val.options.inject = false
+        val.options.inject = true
       }
     })
   },

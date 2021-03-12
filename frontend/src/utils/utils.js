@@ -11,6 +11,7 @@ import getConfig from './config'
 
 // Initialize contract & set global variables
 export async function initContract () {
+  window.startImgUrl = ''
   const nearConfig = getConfig(process.env.VUE_APP_NODE_ENV || 'development')
   // Initialize connection to the NEAR testnet  InMemoryKeyStore
   const near = await connect(Object.assign({ deps: { keyStore: new keyStores.InMemoryKeyStore() } }, nearConfig))

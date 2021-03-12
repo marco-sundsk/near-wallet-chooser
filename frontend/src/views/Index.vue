@@ -19,7 +19,7 @@
               <li v-for="(item, index) in walletArr" :key="index" @click="goWallet(item)" :class="{ select: item.wallet_name === walletName }">
                 <div class="wallet-info">
                   <div class="wallet-logo">
-                    <img :src="window.startImgUrl + '/img/' + item.wallet_logo_url" alt="">
+                    <img :src="imgUrl + '/img/' + item.wallet_logo_url" alt="">
                   </div>
                   <div class="wallet-name">{{item.wallet_name}}</div>
                 </div>
