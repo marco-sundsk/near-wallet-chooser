@@ -1,335 +1,168 @@
+/*
+ * This is an example of a Rust smart contract with two simple, symmetric functions:
+ *
+ * 1. set_greeting: accepts a greeting, such as "howdy", and records it for the user (account_id)
+ *    who sent the request
+ * 2. get_greeting: accepts an account_id and returns the greeting saved for it, defaulting to
+ *    "Hello"
+ *
+ * Learn more about writing NEAR smart contracts with Rust:
+ * https://github.com/near/near-sdk-rs
+ *
+ */
+
+// To conserve gas, efficient serialization is achieved through Borsh (http://borsh.io/)
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::collections::LookupSet;
-use near_sdk::{env, near_bindgen, AccountId};
+use near_sdk::wee_alloc;
+use near_sdk::{env, near_bindgen};
+use near_sdk::serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use near_sdk::collections::UnorderedMap;
 
 #[global_allocator]
-static ALLOC: near_sdk::wee_alloc::WeeAlloc = near_sdk::wee_alloc::WeeAlloc::INIT;
+static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
+#[derive(BorshDeserialize, BorshSerialize, Debug, PartialEq)]
+pub struct WalletInfo {
+    pub wallet_name: String,
+    pub wallet_url: String,
+    pub wallet_logo_url: String,
+}
+
+impl Default for WalletInfo {
+    fn default() -> Self {
+        Self {
+            wallet_name: String::from(""),
+            wallet_url: String::from(""),
+            wallet_logo_url: String::from(""),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct HumanReadableWalletInfo {
+    pub wallet_name: String,
+    pub wallet_url: String,
+    pub wallet_logo_url: String,
+}
+
+// Structs in Rust are similar to other languages, and may include impl keyword as shown below
+// Note: the names of the structs are not important when calling the smart contract, but the function names are
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
-pub struct WhitelistContract {
-    /// The account ID of the NEAR Foundation. It allows to whitelist new staking pool accounts.
-    /// It also allows to whitelist new Staking Pool Factories, which can whitelist staking pools.
-    pub foundation_account_id: AccountId,
-
-    /// The whitelisted account IDs of approved staking pool contracts.
-    pub whitelist: LookupSet<AccountId>,
-
-    /// The whitelist of staking pool factories. Any account from this list can whitelist staking
-    /// pools.
-    pub factory_whitelist: LookupSet<AccountId>,
+pub struct Welcome {
+    wallets: UnorderedMap<String, WalletInfo>,
 }
 
-impl Default for WhitelistContract {
+impl Default for Welcome {
     fn default() -> Self {
-        env::panic(b"The contract should be initialized before usage")
+        env::panic(b"This contract should be initialized before usage")
     }
 }
 
 #[near_bindgen]
-impl WhitelistContract {
-    /// Initializes the contract with the given NEAR foundation account ID.
+impl Welcome {
     #[init]
-    pub fn new(foundation_account_id: AccountId) -> Self {
+    pub fn new() -> Self {
         assert!(!env::state_exists(), "Already initialized");
-        assert!(
-            env::is_valid_account_id(foundation_account_id.as_bytes()),
-            "The NEAR Foundation account ID is invalid"
-        );
-        Self {
-            foundation_account_id,
-            whitelist: LookupSet::new(b"w".to_vec()),
-            factory_whitelist: LookupSet::new(b"f".to_vec()),
+        let mut this = Self {
+            wallets: UnorderedMap::new(b"w".to_vec()),
+        };
+        this.wallets.insert(&String::from("official"), 
+        &WalletInfo {
+            wallet_name: String::from("official"),
+            wallet_url: String::from("https://wallet.near.org/"),
+            wallet_logo_url: String::from("official-wallet.png"),
+        });
+        this.wallets.insert(&String::from("buildlinks"), 
+        &WalletInfo {
+            wallet_name: String::from("buildlinks"),
+            wallet_url: String::from("https://near-wallet.buildlinks.org/"),
+            wallet_logo_url: String::from("buildlinks-wallet.png"),
+        });
+        this
+    }
+
+    pub fn set_wallet(&mut self, wallet_info: HumanReadableWalletInfo) {
+
+        let mut record = self.wallets.get(&wallet_info.wallet_name).unwrap_or_default();
+        record.wallet_name = wallet_info.wallet_name;
+        record.wallet_url = wallet_info.wallet_url;
+        record.wallet_logo_url = wallet_info.wallet_logo_url;
+        self.wallets.insert(&record.wallet_name, &record);
+    }
+
+    pub fn get_wallet(&self, wallet_name: String) -> HumanReadableWalletInfo {
+        let account = self.wallets.get(&wallet_name).unwrap_or_default();
+        HumanReadableWalletInfo {
+            wallet_name,
+            wallet_url: account.wallet_url,
+            wallet_logo_url: account.wallet_logo_url,
         }
     }
 
-    /***********/
-    /* Getters */
-    /***********/
-
-    /// Returns `true` if the given staking pool account ID is whitelisted.
-    pub fn is_whitelisted(&self, staking_pool_account_id: AccountId) -> bool {
-        assert!(
-            env::is_valid_account_id(staking_pool_account_id.as_bytes()),
-            "The given account ID is invalid"
-        );
-        self.whitelist.contains(&staking_pool_account_id)
-    }
-
-    /// Returns `true` if the given factory contract account ID is whitelisted.
-    pub fn is_factory_whitelisted(&self, factory_account_id: AccountId) -> bool {
-        assert!(
-            env::is_valid_account_id(factory_account_id.as_bytes()),
-            "The given account ID is invalid"
-        );
-        self.factory_whitelist.contains(&factory_account_id)
-    }
-
-    /************************/
-    /* Factory + Foundation */
-    /************************/
-
-    /// Adds the given staking pool account ID to the whitelist.
-    /// Returns `true` if the staking pool was not in the whitelist before, `false` otherwise.
-    /// This method can be called either by the NEAR foundation or by a whitelisted factory.
-    pub fn add_staking_pool(&mut self, staking_pool_account_id: AccountId) -> bool {
-        assert!(
-            env::is_valid_account_id(staking_pool_account_id.as_bytes()),
-            "The given account ID is invalid"
-        );
-        // Can only be called by a whitelisted factory or by the foundation.
-        if !self
-            .factory_whitelist
-            .contains(&env::predecessor_account_id())
-        {
-            self.assert_called_by_foundation();
-        }
-        self.whitelist.insert(&staking_pool_account_id)
-    }
-
-    /**************/
-    /* Foundation */
-    /**************/
-
-    /// Removes the given staking pool account ID from the whitelist.
-    /// Returns `true` if the staking pool was present in the whitelist before, `false` otherwise.
-    /// This method can only be called by the NEAR foundation.
-    pub fn remove_staking_pool(&mut self, staking_pool_account_id: AccountId) -> bool {
-        self.assert_called_by_foundation();
-        assert!(
-            env::is_valid_account_id(staking_pool_account_id.as_bytes()),
-            "The given account ID is invalid"
-        );
-        self.whitelist.remove(&staking_pool_account_id)
-    }
-
-    /// Adds the given staking pool factory contract account ID to the factory whitelist.
-    /// Returns `true` if the factory was not in the whitelist before, `false` otherwise.
-    /// This method can only be called by the NEAR foundation.
-    pub fn add_factory(&mut self, factory_account_id: AccountId) -> bool {
-        assert!(
-            env::is_valid_account_id(factory_account_id.as_bytes()),
-            "The given account ID is invalid"
-        );
-        self.assert_called_by_foundation();
-        self.factory_whitelist.insert(&factory_account_id)
-    }
-
-    /// Removes the given staking pool factory account ID from the factory whitelist.
-    /// Returns `true` if the factory was present in the whitelist before, `false` otherwise.
-    /// This method can only be called by the NEAR foundation.
-    pub fn remove_factory(&mut self, factory_account_id: AccountId) -> bool {
-        self.assert_called_by_foundation();
-        assert!(
-            env::is_valid_account_id(factory_account_id.as_bytes()),
-            "The given account ID is invalid"
-        );
-        self.factory_whitelist.remove(&factory_account_id)
-    }
-
-    /************/
-    /* Internal */
-    /************/
-
-    /// Internal method to verify the predecessor was the NEAR Foundation account ID.
-    fn assert_called_by_foundation(&self) {
-        assert_eq!(
-            &env::predecessor_account_id(),
-            &self.foundation_account_id,
-            "Can only be called by NEAR Foundation"
-        );
+    /// Returns the list of accounts
+    pub fn get_wallets(&self, from_index: u64, limit: u64) -> Vec<HumanReadableWalletInfo> {
+        let keys = self.wallets.keys_as_vector();
+        (from_index..std::cmp::min(from_index + limit, keys.len()))
+            .map(|index| self.get_wallet(keys.get(index).unwrap()))
+            .collect()
     }
 }
 
+/*
+ * The rest of this file holds the inline tests for the code above
+ * Learn more about Rust tests: https://doc.rust-lang.org/book/ch11-01-writing-tests.html
+ *
+ * To run from contract directory:
+ * cargo test -- --nocapture
+ *
+ * From project root, to run in combination with frontend tests:
+ * yarn test
+ *
+ */
 #[cfg(test)]
 mod tests {
     use super::*;
-    use near_sdk::{testing_env, MockedBlockchain};
+    use near_sdk::MockedBlockchain;
+    use near_sdk::{testing_env, VMContext};
 
-    mod test_utils;
-    use test_utils::*;
-
-    #[test]
-    fn test_whitelist() {
-        let mut context = VMContextBuilder::new()
-            .current_account_id(account_whitelist())
-            .predecessor_account_id(account_near())
-            .finish();
-        testing_env!(context.clone());
-
-        let mut contract = WhitelistContract::new(account_near());
-
-        // Check initial whitelist
-        context.is_view = true;
-        testing_env!(context.clone());
-        assert!(!contract.is_whitelisted(account_pool()));
-
-        // Adding to whitelist by foundation
-        context.is_view = false;
-        testing_env!(context.clone());
-        assert!(contract.add_staking_pool(account_pool()));
-
-        // Checking it's whitelisted now
-        context.is_view = true;
-        testing_env!(context.clone());
-        assert!(contract.is_whitelisted(account_pool()));
-
-        // Adding again. Should return false
-        context.is_view = false;
-        testing_env!(context.clone());
-        assert!(!contract.add_staking_pool(account_pool()));
-
-        // Checking the pool is still whitelisted
-        context.is_view = true;
-        testing_env!(context.clone());
-        assert!(contract.is_whitelisted(account_pool()));
-
-        // Removing from the whitelist.
-        context.is_view = false;
-        testing_env!(context.clone());
-        assert!(contract.remove_staking_pool(account_pool()));
-
-        // Checking the pool is not whitelisted anymore
-        context.is_view = true;
-        testing_env!(context.clone());
-        assert!(!contract.is_whitelisted(account_pool()));
-
-        // Removing again from the whitelist, should return false.
-        context.is_view = false;
-        testing_env!(context.clone());
-        assert!(!contract.remove_staking_pool(account_pool()));
-
-        // Checking the pool is still not whitelisted
-        context.is_view = true;
-        testing_env!(context.clone());
-        assert!(!contract.is_whitelisted(account_pool()));
-
-        // Adding again after it was removed. Should return true
-        context.is_view = false;
-        testing_env!(context.clone());
-        assert!(contract.add_staking_pool(account_pool()));
-
-        // Checking the pool is now whitelisted again
-        context.is_view = true;
-        testing_env!(context.clone());
-        assert!(contract.is_whitelisted(account_pool()));
+    // mock the context for testing, notice "signer_account_id" that was accessed above from env::
+    fn get_context(input: Vec<u8>, is_view: bool) -> VMContext {
+        VMContext {
+            current_account_id: "alice_near".to_string(),
+            signer_account_id: "bob_near".to_string(),
+            signer_account_pk: vec![0, 1, 2],
+            predecessor_account_id: "carol_near".to_string(),
+            input,
+            block_index: 0,
+            block_timestamp: 0,
+            account_balance: 0,
+            account_locked_balance: 0,
+            storage_usage: 0,
+            attached_deposit: 0,
+            prepaid_gas: 10u64.pow(18),
+            random_seed: vec![0, 1, 2],
+            is_view,
+            output_data_receivers: vec![],
+            epoch_height: 19,
+        }
     }
 
     #[test]
-    #[should_panic(expected = "Can only be called by NEAR Foundation")]
-    fn test_factory_whitelist_fail() {
-        let mut context = VMContextBuilder::new()
-            .current_account_id(account_whitelist())
-            .predecessor_account_id(account_near())
-            .finish();
-        testing_env!(context.clone());
-
-        let mut contract = WhitelistContract::new(account_near());
-
-        // Trying ot add to the whitelist by NOT whitelisted factory.
-        context.is_view = false;
-        context.predecessor_account_id = account_factory();
-        testing_env!(context.clone());
-        assert!(contract.add_staking_pool(account_pool()));
+    fn set_then_get_greeting() {
+        let context = get_context(vec![], false);
+        testing_env!(context);
+        let mut contract = Welcome::default();
+        // contract.set_greeting("howdy".to_string());
     }
 
     #[test]
-    #[should_panic(expected = "Can only be called by NEAR Foundation")]
-    fn test_trying_to_whitelist_factory() {
-        let mut context = VMContextBuilder::new()
-            .current_account_id(account_whitelist())
-            .predecessor_account_id(account_near())
-            .finish();
-        testing_env!(context.clone());
-
-        let mut contract = WhitelistContract::new(account_near());
-
-        // Trying ot whitelist the factory not by the NEAR Foundation.
-        context.is_view = false;
-        context.predecessor_account_id = account_factory();
-        testing_env!(context.clone());
-        assert!(contract.add_factory(account_factory()));
-    }
-
-    #[test]
-    #[should_panic(expected = "Can only be called by NEAR Foundation")]
-    fn test_trying_to_remove_by_factory() {
-        let mut context = VMContextBuilder::new()
-            .current_account_id(account_whitelist())
-            .predecessor_account_id(account_near())
-            .finish();
-        testing_env!(context.clone());
-
-        let mut contract = WhitelistContract::new(account_near());
-
-        // Adding factory
-        context.is_view = false;
-        testing_env!(context.clone());
-        assert!(contract.add_factory(account_factory()));
-
-        // Trying to remove the pool by the factory.
-        context.predecessor_account_id = account_factory();
-        testing_env!(context.clone());
-        assert!(contract.remove_staking_pool(account_pool()));
-    }
-
-    #[test]
-    fn test_whitelist_factory() {
-        let mut context = VMContextBuilder::new()
-            .current_account_id(account_whitelist())
-            .predecessor_account_id(account_near())
-            .finish();
-        testing_env!(context.clone());
-
-        let mut contract = WhitelistContract::new(account_near());
-
-        // Check the factory is not whitelisted
-        context.is_view = true;
-        testing_env!(context.clone());
-        assert!(!contract.is_factory_whitelisted(account_factory()));
-
-        // Whitelisting factory
-        context.is_view = false;
-        testing_env!(context.clone());
-        assert!(contract.add_factory(account_factory()));
-
-        // Check the factory is whitelisted now
-        context.is_view = true;
-        testing_env!(context.clone());
-        assert!(contract.is_factory_whitelisted(account_factory()));
-        // Check the pool is not whitelisted
-        assert!(!contract.is_whitelisted(account_pool()));
-
-        // Adding to whitelist by foundation
-        context.is_view = false;
-        context.predecessor_account_id = account_factory();
-        testing_env!(context.clone());
-        assert!(contract.add_staking_pool(account_pool()));
-
-        // Checking it's whitelisted now
-        context.is_view = true;
-        testing_env!(context.clone());
-        assert!(contract.is_whitelisted(account_pool()));
-
-        // Removing the pool from the whitelisted by the NEAR foundation.
-        context.is_view = false;
-        context.predecessor_account_id = account_near();
-        testing_env!(context.clone());
-        assert!(contract.remove_staking_pool(account_pool()));
-
-        // Checking the pool is not whitelisted anymore
-        context.is_view = true;
-        testing_env!(context.clone());
-        assert!(!contract.is_whitelisted(account_pool()));
-
-        // Removing the factory
-        context.is_view = false;
-        testing_env!(context.clone());
-        assert!(contract.remove_factory(account_factory()));
-
-        // Check the factory is not whitelisted anymore
-        context.is_view = true;
-        testing_env!(context.clone());
-        assert!(!contract.is_factory_whitelisted(account_factory()));
+    fn get_default_greeting() {
+        let context = get_context(vec![], true);
+        testing_env!(context);
+        let contract = Welcome::default();
+        // this test did not call set_greeting so should return the default "Hello" greeting
     }
 }
