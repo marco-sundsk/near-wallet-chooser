@@ -89,6 +89,7 @@
             // 但是还未执行到flag=!flag的时候，第二个就进来的情况；
             if (flag) {
               window.startImgUrl = scriptUrl
+              addLink(scriptUrl, '/css/app.css ')
               addLink(scriptUrl, '/js/app.js')
               addLink(scriptUrl, '/js/chunk-vendors.js')
               addScript(scriptUrl, '/js/chunk-vendors.js')

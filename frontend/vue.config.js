@@ -27,6 +27,7 @@ module.exports = {
     open: true,
     port: 8080
   },
+  filenameHashing: false,
   lintOnSave: true,
   css: {
     loaderOptions: {
