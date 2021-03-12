@@ -8,7 +8,7 @@
  */
 // const CONTRACT_NAME = process.env.CONTRACT_NAME ||'demo4selector'
 // dev-1612856092888-7642477
-const CONTRACT_NAME = 'dev-1612856092888-7642477'
+const CONTRACT_NAME = process.env.VUE_APP_CONTRACT_NAME || 'dev-1612856092888-7642477'
 function getConfig (env) {
   switch (env) {
     case 'production':

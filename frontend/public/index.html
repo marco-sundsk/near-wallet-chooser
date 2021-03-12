@@ -18,19 +18,33 @@
       	// 腾讯：http://frontend-1258187630.file.myqcloud.com/js/chunk-vendors.js
         // 阿里：https://buildlinks-nearwallet-selector.s3-accelerate.amazonaws.com/js/chunk-vendors.js
         // 谷歌：https://buildlinks-nearwallet-selector-frontend.oss-accelerate.aliyuncs.com/js/chunk-vendors.js
-        let qq = 'http://frontend-1258187630.file.myqcloud.com'
-        let ali = 'https://buildlinks-nearwallet-selector.s3-accelerate.amazonaws.com'
-        let google = 'https://buildlinks-nearwallet-selector-frontend.oss-accelerate.aliyuncs.com'
+        let cdn1 = '<%= VUE_APP_CDN_URL_1 %>'
+        let cdn2 = '<%= VUE_APP_CDN_URL_2 %>'
+        let cdn3 = '<%= VUE_APP_CDN_URL_3 %>'
+        let cdn4 = '<%= VUE_APP_CDN_URL_4 %>'
+        let cdn5 = '<%= VUE_APP_CDN_URL_5 %>'
 
         let urlArr = [
           {
-            request: ali + '/img/bg.d033c87f.png',
-            url: ali
+            request: cdn1 + '/img/bg.d033c87f.png',
+            url: cdn1
           },
           {
-            request: google + '/img/bg.d033c87f.png',
-            url: google
-          }
+            request: cdn2  + '/img/bg.d033c87f.png',
+            url: cdn2
+          },
+          {
+            request: cdn3  + '/img/bg.d033c87f.png',
+            url: cdn3
+          },
+          {
+            request: cdn4  + '/img/bg.d033c87f.png',
+            url: cdn4
+          },
+          {
+            request: cdn5  + '/img/bg.d033c87f.png',
+            url: cdn5
+          },
         ]
 
         let timeRecord = {} // url与请求时间的记录
@@ -101,6 +115,7 @@
          * @param callback 请求成功后执行的操作
          */
         let requestByXMLHttpRequest = (url, callback, scriptUrl) => {
+          if (!scriptUrl) return
           const request = new XMLHttpRequest()
 
           request.open("GET", url)
