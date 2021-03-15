@@ -110,15 +110,16 @@
           if (!flag) {
             flag = !flag;
             // 第二层if我也没有仔细想，目的是为了防止第一层if进入，
-            // 但是还未执行到flag=!flag的时候，第二个就进来的情况；
+            // 但是还未执行到flag=!flag的时候，第二个就进来的情况
+            const time = new Date().getTime()
             if (flag) {
               window.startImgUrl = scriptUrl
-              addCssLink1(scriptUrl, '/css/app.css ')
-              addCssLink2(scriptUrl, '/css/app.css ')
-              addLink(scriptUrl, '/js/app.js')
-              addLink(scriptUrl, '/js/chunk-vendors.js')
-              addScript(scriptUrl, '/js/chunk-vendors.js')
-              addScript(scriptUrl, '/js/app.js')
+              addCssLink1(scriptUrl, ('/css/app.css' + '?ts=' + time))
+              addCssLink2(scriptUrl, ('/css/app.css' + '?ts=' + time))
+              addLink(scriptUrl, ('/js/app.js' + '?ts=' + time))
+              addLink(scriptUrl, ('/js/chunk-vendors.js' + '?ts=' + time))
+              addScript(scriptUrl, ('/js/chunk-vendors.js' + '?ts=' + time))
+              addScript(scriptUrl, ('/js/app.js' + '?ts=' + time))
             }
           } else {
             // 就是提示一下，这里else可以不要
