@@ -21,6 +21,7 @@ const postcss = px2rem({
   remUnit: 16
 })
 module.exports = {
+  productionSourceMap: false,
   publicPath,
   devServer: {
     publicPath,

@@ -1,11 +1,3 @@
-/*
- * @Author: your name
- * @Date: 2021-02-21 12:58:29
- * @LastEditTime: 2021-02-22 16:30:59
- * @LastEditors: Please set LastEditors
- * @Description: In User Settings Edit
- * @FilePath: /swap-select/src/utils/rem.js
- */
 // rem等比适配配置文件
 // 基准大小
 const baseSize = 16
